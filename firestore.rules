@@ -1,0 +1,92 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default-deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['userId', 'userName', 'userClass', 'schoolId', 'schoolName', 'stars', 'completedLessons', 'completedContests', 'updatedAt'])
+        && data.userId is string && data.userId.size() <= 200
+        && data.userName is string && data.userName.size() <= 100
+        && data.userClass is string && data.userClass.size() <= 20
+        && data.schoolId is string && data.schoolId.size() <= 50
+        && data.schoolName is string && data.schoolName.size() <= 200
+        && (data.stars is int || data.stars is number) && data.stars >= 0
+        && data.completedLessons is list && data.completedLessons.size() <= 1000
+        && data.completedContests is list && data.completedContests.size() <= 1000;
+    }
+
+    function isValidAuth(data) {
+      return data.keys().hasAll(['username', 'password', 'userId'])
+        && data.username is string && data.username.size() <= 100
+        && data.password is string && data.password.size() <= 100
+        && data.userId is string && data.userId.size() <= 200;
+    }
+
+    match /_health/{docId} {
+      allow read, write: if true;
+    }
+
+    match /auth_users/{username} {
+      // Allow public get to check existence and password (mock auth)
+      allow get: if true;
+      // Allow creation for register
+      allow create: if isValidAuth(request.resource.data) && username == request.resource.data.username;
+    }
+
+    match /users/{userId} {
+      // Allow public reading
+      allow get: if true;
+      // Allow public listing
+      allow list: if true; 
+      
+      // Allow creating/updating
+      allow create: if true;
+      allow update: if true;
+    }
+
+    match /coding_chapters/{chapterId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    match /coding_problems/{problemId} {
+      allow read: if true;
+      allow write: if true; // In production, restrict to admin
+    }
+
+    match /custom_lessons/{lessonId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    match /contests/{contestId} {
+      allow read: if true;
+      allow write: if true; // In production, restrict to admin
+    }
+
+    match /contest_submissions/{submissionId} {
+      allow read: if true; // For leaderboard
+      allow create: if true; // Allow students to submit
+    }
+
+    match /matches/{matchId} {
+      allow read: if true;
+      allow write: if true;
+    }
+  }
+}

@@ -1,0 +1,128 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "Information about a student user",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "userClass": { "type": "string" },
+        "schoolId": { "type": "string" },
+        "schoolName": { "type": "string" },
+        "stars": { "type": "integer" },
+        "completedLessons": { "type": "array" },
+        "completedContests": { "type": "array" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "userName", "userClass", "schoolId", "schoolName", "stars", "completedLessons", "completedContests", "updatedAt"]
+    },
+    "AuthUser": {
+      "title": "Authentication Data",
+      "description": "Credentials for manual auth",
+      "type": "object",
+      "properties": {
+        "username": { "type": "string" },
+        "password": { "type": "string" },
+        "userId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "status" }
+      },
+      "required": ["username", "password", "userId"]
+    },
+    "CodingProblem": {
+      "title": "Coding Problem",
+      "description": "A programming exercise",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "difficulty": { 
+          "type": "string", 
+          "enum": ["easy", "medium", "hard"] 
+        },
+        "sampleInput": { "type": "string" },
+        "sampleOutput": { "type": "string" },
+        "testCases": { "type": "array" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "createdBy": { "type": "string" }
+      },
+      "required": ["title", "description", "difficulty", "createdAt"]
+    },
+    "Match": {
+      "title": "Competitive Match",
+      "description": "A real-time competitive coding session",
+      "type": "object",
+      "properties": {
+        "matchId": { "type": "string" },
+        "type": { "type": "string", "enum": ["1v1", "2v2"] },
+        "status": { "type": "string", "enum": ["lobby", "playing", "finished"] },
+        "players": { 
+          "type": "array" 
+        },
+        "problemIds": { "type": "array" },
+        "timeLimitMinutes": { "type": "integer" },
+        "defaultTimeMinutes": { "type": "integer" },
+        "startTime": { "type": "string", "format": "date-time" },
+        "hostId": { "type": "string" },
+        "scores": { "type": "object" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["matchId", "type", "status", "players", "problemIds", "timeLimitMinutes", "hostId", "createdAt"]
+    },
+    "Contest": {
+      "title": "Contest",
+      "description": "A timed coding competition",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "startTime": { "type": "string", "format": "date-time" },
+        "endTime": { "type": "string", "format": "date-time" },
+        "rewardStars": { "type": "integer" },
+        "problemIds": { "type": "array" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "startTime", "endTime", "problemIds", "rewardStars"]
+    },
+    "ContestSubmission": {
+      "title": "Contest Submission",
+      "description": "A student's attempt at a contest problem",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "userClass": { "type": "string" },
+        "contestId": { "type": "string" },
+        "problemId": { "type": "string" },
+        "isCorrect": { "type": "boolean" },
+        "submittedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "contestId", "problemId", "isCorrect", "submittedAt"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "User",
+      "description": "The user's individual profile and progress"
+    },
+    "auth_users/{username}": {
+      "schema": "AuthUser",
+      "description": "Storage for manual username/password pairs"
+    },
+    "coding_problems/{problemId}": {
+      "schema": "CodingProblem",
+      "description": "Database of programming exercises"
+    },
+    "contests/{contestId}": {
+      "schema": "Contest",
+      "description": "Timed competitions"
+    },
+    "contest_submissions/{submissionId}": {
+      "schema": "ContestSubmission",
+      "description": "Tracks student performance in contests"
+    },
+    "matches/{matchId}": {
+      "schema": "Match",
+      "description": "Real-time match data"
+    }
+  }
+}
